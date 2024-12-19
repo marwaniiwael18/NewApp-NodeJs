@@ -1,19 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Document</title>
+    <title>Search Ordinateur by Category</title>
     <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
-  <h1>Bonjour</h1>  
-  <script>
-  var socket = io();
-  socket.on('msg',(data)=>{
-    console.log(data)
-    var p = document.createElement('p')
-    p.innerText= data
-    document.body.append(p)
-  })
-  </script>
+    <h1>Search Ordinateur by Category</h1>
+    <form id="categoryForm">
+        <input type="text" id="categoryInput" placeholder="Enter category" required>
+        <button type="submit">Search</button>
+    </form>
+    <div id="ordinateurResults"></div>
+
+    <script>
+        var socket = io();
+
+        // Ordinateur search functionality
+        document.getElementById('categoryForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            var category = document.getElementById('categoryInput').value;
+            socket.emit('searchOrdinateur', category);
+        });
+
+        socket.on('ordinateurResults', (data) => {
+            var resultsDiv = document.getElementById('ordinateurResults');
+            resultsDiv.innerHTML = '';
+            data.forEach(ordinateur => {
+                var p = document.createElement('p');
+                p.innerText = `Model: ${ordinateur.madele}, Category: ${ordinateur.categorie}, Date: ${new Date(ordinateur.dateFabrication).toLocaleDateString()}, Price: ${ordinateur.prix}`;
+                resultsDiv.appendChild(p);
+            });
+        });
+    </script>
 </body>
 </html>

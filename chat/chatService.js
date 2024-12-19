@@ -1,14 +1,36 @@
 var Chat = require('./chatModel')
 var socketIo = require('socket.io')
 
-function socketIO(server){
-    const io = socketIo(server)
-    io.on('connection',(socket)=>{
-        console.log("user connected !");
-        socket.broadcast.emit("msg","A new user is connected !")
-    })
+const socketIO = (server) => {
+    const io = require('socket.io')(server);
+    const ordinateurController = require('../controllers/ordinateurController');
+
+    io.on('connection', (socket) => {
+        console.log('a user connected');
+
+        socket.on('filterByCategory', async (category) => {
+            try {
+                const ordinateurs = await ordinateurController.filterOrdinateursByCategory(category);
+                socket.emit('ordinateurs', ordinateurs);
+            } catch (error) {
+                socket.emit('error', error.message);
+            }
+        });
+
+        socket.on('searchOrdinateur', async (category) => {
+            try {
+                const ordinateurs = await ordinateurController.filterOrdinateursByCategory(category);
+                socket.emit('ordinateurResults', ordinateurs);
+            } catch (error) {
+                socket.emit('error', error.message);
+            }
+        });
+
+        socket.broadcast.emit("msg","A new user is connected !");
+    });
+
     return io;
-}
+};
 
 function chatView(req, res, next) {
     res.render('chat')
